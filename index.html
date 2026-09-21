@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Meter Digit Editor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        /* =========================
+           METER BUTTONS
+        ========================= */
+
+        .meter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .meter-buttons button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .meter-buttons button:hover {
+            background: #1d4ed8;
+        }
+
+        /* =========================
+           CONTROLS
+        ========================= */
+
+        .controls {
+            width: 100%;
+            max-width: 1000px;
+            margin: auto;
+            margin-bottom: 20px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+
+            background: rgba(255,255,255,0.08);
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        #numberInput {
+            width: 220px;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .control-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            background: #10b981;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background: #059669;
+        }
+
+        #colorPicker {
+            width: 42px;
+            height: 38px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* =========================
+           METER
+        ========================= */
+
+        #meterContainer {
+            position: relative;
+
+            display: inline-block;
+
+            background: white;
+
+            padding: 8px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.45);
+
+            overflow: hidden;
+        }
+
+        #meterImage {
+            display: block;
+
+            width: 450px;
+            max-width: 90vw;
+
+            height: auto;
+
+            border-radius: 8px;
+
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* =========================
+           FULL IMAGE DRAG AREA
+        ========================= */
+
+        #digitArea {
+            position: absolute;
+
+            left: 8px;
+            top: 8px;
+
+            width: calc(100% - 16px);
+            height: calc(100% - 16px);
+
+            pointer-events: none;
+
+            overflow: visible;
+        }
+
+        /* =========================
+           DIGIT GROUP
+        ========================= */
+
+        #digitGroup {
+            position: absolute;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 0;
+
+            cursor: move;
+
+            user-select: none;
+            -webkit-user-select: none;
+
+            touch-action: none;
+
+            pointer-events: auto;
+
+            transform-origin: top left;
+
+            min-width: 1px;
+            min-height: 1px;
+        }
+
+        /* =========================
+           DIGIT IMAGE
+        ========================= */
+
+        .digit-image {
+            display: block;
+
+            width: auto;
+
+            height: 29px;
+
+            max-width: none;
+
+            object-fit: contain;
+
+            pointer-events: none;
+
+            user-select: none;
+
+            -webkit-user-drag: none;
+
+            flex-shrink: 0;
+        }
+
+        /* =========================
+           WATERMARK
+        ========================= */
+
+        .watermark {
+            position: absolute;
+
+            bottom: 5px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            background: rgba(220, 38, 38, 0.8);
+
+            color: white;
+
+            padding: 3px 8px;
+
+            border-radius: 4px;
+
+            font-size: 10px;
+
+            font-weight: bold;
+
+            pointer-events: none;
+
+            z-index: 20;
+        }
+
+        .info {
+            margin-top: 14px;
+
+            font-size: 13px;
+
+            color: #cbd5e1;
+        }
+
+        @media(max-width:600px) {
+
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            #numberInput {
+                width: 100%;
+            }
+
+            .controls {
+                width: 95%;
+            }
+
+            #meterImage {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <h1>
+        Smart Meter Digit Editor
+    </h1>
+
+
+    <!-- =========================
+         METER BUTTONS
+    ========================= -->
+
+    <div class="meter-buttons">
+
+        <button onclick="changeMeter(1)">Meter 1</button>
+        <button onclick="changeMeter(2)">Meter 2</button>
+        <button onclick="changeMeter(3)">Meter 3</button>
+        <button onclick="changeMeter(4)">Meter 4</button>
+        <button onclick="changeMeter(5)">Meter 5</button>
+        <button onclick="changeMeter(6)">Meter 6</button>
+        <button onclick="changeMeter(7)">Meter 7</button>
+        <button onclick="changeMeter(8)">Meter 8</button>
+        <button onclick="changeMeter(9)">Meter 9</button>
+        <button onclick="changeMeter(10)">Meter 10</button>
+        <button onclick="changeMeter(11)">Meter 11</button>
+        <button onclick="changeMeter(12)">Meter 12</button>
+        <button onclick="changeMeter(13)">Meter 13</button>
+        <button onclick="changeMeter(14)">Meter 14</button>
+        <button onclick="changeMeter(15)">Meter 15</button>
+
+    </div>
+
+
+    <!-- =========================
+         CONTROLS
+    ========================= -->
+
+    <div class="controls">
+
+        <input
+            type="text"
+            id="numberInput"
+            placeholder="Enter digits"
+            inputmode="numeric"
+            autocomplete="off"
+        >
+
+        <button
+            class="control-btn"
+            onclick="updateDigits()"
+        >
+            Update Digit
+        </button>
+
+        <button
+            class="control-btn"
+            onclick="increaseSize()"
+        >
+            A+
+        </button>
+
+        <button
+            class="control-btn"
+            onclick="decreaseSize()"
+        >
+            A-
+        </button>
+
+        <input
+            type="color"
+            id="colorPicker"
+            value="#303030"
+            title="Digit color"
+        >
+
+        <button
+            class="control-btn"
+            onclick="resetDigit()"
+        >
+            Reset
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         METER IMAGE
+    ========================= -->
+
+    <div id="meterContainer">
+
+        <img
+            id="meterImage"
+            src="genus-solar-meter-250x250.webp"
+            alt="Smart Meter"
+        >
+
+        <!--
+            Ye poori meter image ka area hai.
+            Digit isi poore area me move hogi.
+        -->
+
+        <div id="digitArea">
+
+            <div id="digitGroup"></div>
+
+        </div>
+
+        <div class="watermark">
+            EDITED DEMO
+        </div>
+
+    </div>
+
+
+    <div class="info">
+        Enter digits → Update Digit → drag digits anywhere on the meter.
+    </div>
+
+
+<script>
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const meterImage =
+        document.getElementById("meterImage");
+
+    const meterContainer =
+        document.getElementById("meterContainer");
+
+    const digitArea =
+        document.getElementById("digitArea");
+
+    const digitGroup =
+        document.getElementById("digitGroup");
+
+    const numberInput =
+        document.getElementById("numberInput");
+
+    const colorPicker =
+        document.getElementById("colorPicker");
+
+
+    /* =====================================================
+       CURRENT METER
+    ===================================================== */
+
+    let currentMeter = 1;
+
+
+    /* =====================================================
+       DIGIT POSITION
+    ===================================================== */
+
+    let positionX = 50;
+    let positionY = 50;
+
+
+    /* =====================================================
+       DIGIT SCALE
+    ===================================================== */
+
+    let digitScale = 1;
+
+
+    /* =====================================================
+       DRAG VARIABLES
+    ===================================================== */
+
+    let isDragging = false;
+
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+
+    /* =====================================================
+       DIGIT IMAGE URLS
+       
+       IMPORTANT:
+       Ye wahi original digit images hain.
+       
+       Folder structure:
+       
+       smart_meter2/
+       │
+       ├── index.html
+       │
+       └── digits/
+           ├── 0.jpg
+           ├── 1.jpg
+           ├── 2.jpg
+           ├── 3.jpg
+           ├── 4.jpg
+           ├── 5.jpg
+           ├── 6.jpg
+           ├── 7.jpg
+           ├── 8.jpg
+           └── 9.jpg
+    ===================================================== */
+
+    const digitUrls = {
+
+        "0": "digits/0.jpg",
+
+        "1": "digits/1.jpg",
+
+        "2": "digits/2.jpg",
+
+        "3": "digits/3.jpg",
+
+        "4": "digits/4.jpg",
+
+        "5": "digits/5.jpg",
+
+        "6": "digits/6.jpg",
+
+        "7": "digits/7.jpg",
+
+        "8": "digits/8.jpg",
+
+        "9": "digits/9.jpg"
+
+    };
+
+
+    /* =====================================================
+       METER IMAGES
+       
+       Meter 1 tumhara current image hai.
+       
+       Agar baaki meter images ke exact naam alag hain,
+       sirf yahan filenames change karna.
+    ===================================================== */
+
+    const meterImages = {
+
+        1: "genus-solar-meter-250x250.webp",
+
+        2: "WhatsApp Image 2026-06-12 at 8.35.39 AM (1).jpeg",
+
+        3: "WhatsApp Image 2026-06-12 at 8.35.39 AM.jpeg",
+        4: "WhatsApp Image 2026-06-22 at 4.17.11 PM.jpeg",
+        5: "WhatsApp Image 2026-06-22 at 4.17.12 PM (1).jpeg",
+        6: "WhatsApp Image 2026-06-22 at 4.17.12 PM.jpeg",
+        7: "WhatsApp Image 2026-06-22 at 4.17.13 PM.jpeg",
+        8: "WhatsApp Image 2026-06-22 at 4.17.14 PM (1).jpeg",
+        9: "WhatsApp Image 2026-06-22 at 4.17.14 PM.jpeg",
+        10: "WhatsApp Image 2026-06-22 at 4.17.15 PM (1).jpeg",
+        11: "WhatsApp Image 2026-06-22 at 4.17.15 PM.jpeg",
+        12: "WhatsApp Image 2026-06-22 at 4.17.16 PM (1).jpeg",
+        13: "WhatsApp Image 2026-06-22 at 4.17.16 PM.jpeg",
+        14: "WhatsApp Image 2026-06-22 at 4.17.17 PM (1).jpeg",
+        15: "WhatsApp Image 2026-06-22 at 4.17.17 PM.jpeg"
+    };
+
+
+    /* =====================================================
+       CHANGE METER
+    ===================================================== */
+
+    function changeMeter(number) {
+
+        currentMeter = number;
+
+        meterImage.src =
+            meterImages[number];
+
+        /*
+            Naya meter select hone par
+            purani digit position load karo.
+        */
+
+        loadPosition();
+
+    }
+
+
+    /* =====================================================
+       UPDATE DIGITS
+       
+       IMPORTANT:
+       Empty hone par 00000 nahi banega.
+    ===================================================== */
+
+    function updateDigits() {
+
+        let value =
+            numberInput.value.trim();
+
+
+        /*
+            Sirf 0-9 allow
+        */
+
+        value =
+            value.replace(
+                /[^0-9]/g,
+                ""
+            );
+
+
+        /*
+            Input empty hai to kuch nahi.
+            
+            00000 automatically nahi banega.
+        */
+
+        if (value === "") {
+
+            digitGroup.innerHTML = "";
+
+            return;
+        }
+
+
+        /*
+            Clean value input me bhi set karo
+        */
+
+        numberInput.value = value;
+
+
+        /*
+            Purani digits remove
+        */
+
+        digitGroup.innerHTML = "";
+
+
+        /*
+            Har digit ka original JPG load hoga.
+        */
+
+        for (
+            let i = 0;
+            i < value.length;
+            i++
+        ) {
+
+            const digit =
+                value[i];
+
+
+            const img =
+                document.createElement("img");
+
+
+            img.className =
+                "digit-image";
+
+
+            img.src =
+                digitUrls[digit];
+
+
+            img.alt =
+                "";
+
+
+            /*
+                Agar image mil jaye
+                to show hogi.
+
+                Agar file missing ho,
+                broken image icon nahi dikhega.
+            */
+
+            img.onerror = function() {
+
+                this.style.display =
+                    "none";
+
+            };
+
+
+            /*
+                Digit color
+            */
+
+            applyDigitColor(img);
+
+
+            digitGroup.appendChild(img);
+
+        }
+
+
+        /*
+            Current position maintain karo.
+        */
+
+        updateTransform();
+
+
+        /*
+            Position save karo.
+        */
+
+        savePosition();
+
+    }
+
+
+    /* =====================================================
+       DIGIT COLOR
+    ===================================================== */
+
+    colorPicker.addEventListener(
+        "input",
+        function() {
+
+            const images =
+                digitGroup.querySelectorAll(
+                    ".digit-image"
+                );
+
+
+            images.forEach(
+                function(img) {
+
+                    applyDigitColor(img);
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       APPLY DIGIT COLOR
+    ===================================================== */
+
+    function applyDigitColor(img) {
+
+        const color =
+            colorPicker.value.toLowerCase();
+
+
+        /*
+            Black
+        */
+
+        if (color === "#000000") {
+
+            img.style.filter =
+                "brightness(0.35) contrast(1.2)";
+
+            return;
+        }
+
+
+        /*
+            White
+        */
+
+        if (color === "#ffffff") {
+
+            img.style.filter =
+                "brightness(1.8) contrast(0.7)";
+
+            return;
+        }
+
+
+        /*
+            Default realistic dark digit
+        */
+
+        img.style.filter =
+            "brightness(0.65) contrast(1.15)";
+
+    }
+
+
+    /* =====================================================
+       INCREASE DIGIT SIZE
+    ===================================================== */
+
+    function increaseSize() {
+
+        digitScale += 0.1;
+
+
+        if (digitScale > 4) {
+
+            digitScale = 4;
+
+        }
+
+
+        updateTransform();
+
+        savePosition();
+
+    }
+
+
+    /* =====================================================
+       DECREASE DIGIT SIZE
+    ===================================================== */
+
+    function decreaseSize() {
+
+        digitScale -= 0.1;
+
+
+        if (digitScale < 0.2) {
+
+            digitScale = 0.2;
+
+        }
+
+
+        updateTransform();
+
+        savePosition();
+
+    }
+
+
+    /* =====================================================
+       UPDATE TRANSFORM
+    ===================================================== */
+
+    function updateTransform() {
+
+        digitGroup.style.transform =
+            "translate(" +
+            positionX +
+            "px, " +
+            positionY +
+            "px) " +
+            "scale(" +
+            digitScale +
+            ")";
+
+    }
+
+
+    /* =====================================================
+       GET DRAG LIMITS
+       
+       Digit ko poori meter image ke andar
+       kahin bhi le ja sakte ho.
+    ===================================================== */
+
+    function getDragLimits() {
+
+        const areaRect =
+            digitArea.getBoundingClientRect();
+
+
+        const groupRect =
+            digitGroup.getBoundingClientRect();
+
+
+        const maxX =
+            Math.max(
+                0,
+                areaRect.width -
+                groupRect.width
+            );
+
+
+        const maxY =
+            Math.max(
+                0,
+                areaRect.height -
+                groupRect.height
+            );
+
+
+        return {
+            maxX: maxX,
+            maxY: maxY
+        };
+
+    }
+
+
+    /* =====================================================
+       MOUSE DRAG START
+    ===================================================== */
+
+    digitGroup.addEventListener(
+        "mousedown",
+        function(e) {
+
+            /*
+                Digit nahi hai to drag nahi.
+            */
+
+            if (
+                digitGroup.children.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            const rect =
+                digitGroup.getBoundingClientRect();
+
+
+            dragOffsetX =
+                e.clientX -
+                rect.left;
+
+
+            dragOffsetY =
+                e.clientY -
+                rect.top;
+
+
+            isDragging = true;
+
+
+            e.preventDefault();
+
+        }
+    );
+
+
+    /* =====================================================
+       MOUSE MOVE
+    ===================================================== */
+
+    document.addEventListener(
+        "mousemove",
+        function(e) {
+
+            if (!isDragging) {
+
+                return;
+
+            }
+
+
+            const areaRect =
+                digitArea.getBoundingClientRect();
+
+
+            const limits =
+                getDragLimits();
+
+
+            let newX =
+                e.clientX -
+                areaRect.left -
+                dragOffsetX;
+
+
+            let newY =
+                e.clientY -
+                areaRect.top -
+                dragOffsetY;
+
+
+            /*
+                X limit
+            */
+
+            newX =
+                Math.max(
+                    0,
+                    Math.min(
+                        newX,
+                        limits.maxX
+                    )
+                );
+
+
+            /*
+                Y limit
+            */
+
+            newY =
+                Math.max(
+                    0,
+                    Math.min(
+                        newY,
+                        limits.maxY
+                    )
+                );
+
+
+            positionX =
+                newX;
+
+
+            positionY =
+                newY;
+
+
+            updateTransform();
+
+        }
+    );
+
+
+    /* =====================================================
+       MOUSE UP
+    ===================================================== */
+
+    document.addEventListener(
+        "mouseup",
+        function() {
+
+            if (isDragging) {
+
+                savePosition();
+
+            }
+
+
+            isDragging = false;
+
+        }
+    );
+
+
+    /* =====================================================
+       TOUCH DRAG START
+    ===================================================== */
+
+    digitGroup.addEventListener(
+        "touchstart",
+        function(e) {
+
+            if (
+                digitGroup.children.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            const touch =
+                e.touches[0];
+
+
+            const rect =
+                digitGroup.getBoundingClientRect();
+
+
+            dragOffsetX =
+                touch.clientX -
+                rect.left;
+
+
+            dragOffsetY =
+                touch.clientY -
+                rect.top;
+
+
+            isDragging = true;
+
+
+            e.preventDefault();
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /* =====================================================
+       TOUCH MOVE
+    ===================================================== */
+
+    document.addEventListener(
+        "touchmove",
+        function(e) {
+
+            if (!isDragging) {
+
+                return;
+
+            }
+
+
+            const touch =
+                e.touches[0];
+
+
+            const areaRect =
+                digitArea.getBoundingClientRect();
+
+
+            const limits =
+                getDragLimits();
+
+
+            let newX =
+                touch.clientX -
+                areaRect.left -
+                dragOffsetX;
+
+
+            let newY =
+                touch.clientY -
+                areaRect.top -
+                dragOffsetY;
+
+
+            newX =
+                Math.max(
+                    0,
+                    Math.min(
+                        newX,
+                        limits.maxX
+                    )
+                );
+
+
+            newY =
+                Math.max(
+                    0,
+                    Math.min(
+                        newY,
+                        limits.maxY
+                    )
+                );
+
+
+            positionX =
+                newX;
+
+
+            positionY =
+                newY;
+
+
+            updateTransform();
+
+
+            e.preventDefault();
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /* =====================================================
+       TOUCH END
+    ===================================================== */
+
+    document.addEventListener(
+        "touchend",
+        function() {
+
+            if (isDragging) {
+
+                savePosition();
+
+            }
+
+
+            isDragging = false;
+
+        }
+    );
+
+
+    /* =====================================================
+       SAVE POSITION
+    ===================================================== */
+
+    function savePosition() {
+
+        const data = {
+
+            x: positionX,
+
+            y: positionY,
+
+            scale: digitScale
+
+        };
+
+
+        localStorage.setItem(
+
+            "meter_digit_" +
+            currentMeter,
+
+            JSON.stringify(data)
+
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD POSITION
+    ===================================================== */
+
+    function loadPosition() {
+
+        const saved =
+            localStorage.getItem(
+
+                "meter_digit_" +
+                currentMeter
+
+            );
+
+
+        if (!saved) {
+
+            /*
+                First time:
+                digit ko image ke upper-left
+                area me rakho.
+            */
+
+            positionX = 30;
+
+            positionY = 30;
+
+            digitScale = 1;
+
+            updateTransform();
+
+            return;
+
+        }
+
+
+        try {
+
+            const data =
+                JSON.parse(saved);
+
+
+            positionX =
+                Number(data.x) || 0;
+
+
+            positionY =
+                Number(data.y) || 0;
+
+
+            digitScale =
+                Number(data.scale) || 1;
+
+
+            updateTransform();
+
+        }
+        catch(error) {
+
+            positionX = 30;
+
+            positionY = 30;
+
+            digitScale = 1;
+
+            updateTransform();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       RESET DIGIT
+    ===================================================== */
+
+    function resetDigit() {
+
+        /*
+            Reset ko meter ke upper-left
+            side me rakho.
+            
+            Uske baad tum manually kahin bhi
+            drag kar sakte ho.
+        */
+
+        positionX = 30;
+
+        positionY = 30;
+
+        digitScale = 1;
+
+
+        updateTransform();
+
+        savePosition();
+
+    }
+
+
+    /* =====================================================
+       ENTER KEY
+    ===================================================== */
+
+    numberInput.addEventListener(
+        "keydown",
+        function(e) {
+
+            if (e.key === "Enter") {
+
+                e.preventDefault();
+
+                updateDigits();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       IMAGE LOAD
+       
+       Meter resize hone ke baad digit ko
+       visible rakho.
+    ===================================================== */
+
+    meterImage.addEventListener(
+        "load",
+        function() {
+
+            updateTransform();
+
+        }
+    );
+
+
+    /* =====================================================
+       INITIAL STATE
+       
+       IMPORTANT:
+       Yahan updateDigits() call nahi hai.
+       
+       Isliye page open hote hi 00000 nahi aayega.
+    ===================================================== */
+
+    numberInput.value = "";
+
+    numberInput.placeholder =
+        "Enter digits";
+
+
+    digitGroup.innerHTML =
+        "";
+
+
+    loadPosition();
+
+
+    /* =====================================================
+       AUTO FOCUS
+    ===================================================== */
+
+    numberInput.focus();
+
+</script>
+
+</body>
+</html>
