@@ -1,24 +1,16 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 
 <meta
     name="viewport"
-    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 >
 
 <title>Smart Meter Digit Editor</title>
 
-
 <style>
-
-/* =========================================================
-   BASIC
-========================================================= */
-
 * {
     box-sizing: border-box;
 }
@@ -27,691 +19,468 @@ html,
 body {
     margin: 0;
     padding: 0;
-
-    background: #0f172a;
-    color: #fff;
-
     font-family: Arial, sans-serif;
-
-    overscroll-behavior: none;
+    background: #f2f2f2;
 }
 
 body {
-    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-
-/* =========================================================
-   HEADING
-========================================================= */
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 15px;
+}
 
 h1 {
-
     text-align: center;
-
-    margin: 20px 0;
-
-    font-size: 30px;
+    margin-bottom: 20px;
 }
 
-
-/* =========================================================
+/* =========================
    METER BUTTONS
-========================================================= */
+========================= */
 
 .meter-buttons {
-
     display: flex;
-
     flex-wrap: wrap;
-
     gap: 8px;
-
     justify-content: center;
-
-    padding: 0 20px 18px;
-}
-
-button {
-
-    border: 0;
-
-    border-radius: 7px;
-
-    padding: 10px 15px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 15px;
 }
 
 .meter-buttons button {
-
-    background: #2563eb;
-
-    color: #fff;
+    padding: 8px 13px;
+    border: none;
+    background: #333;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
+.meter-buttons button:hover {
+    background: #555;
+}
 
-/* =========================================================
-   CONTROL AREA
-========================================================= */
+/* =========================
+   CONTROLS
+========================= */
 
 .controls {
-
-    width: min(1000px, calc(100% - 30px));
-
-    margin: auto auto 20px;
-
-    padding: 14px;
-
-    background: #263247;
-
-    border-radius: 10px;
-
     display: flex;
-
-    gap: 8px;
-
-    justify-content: center;
-
-    align-items: center;
-
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-
-/* =========================================================
-   INPUT
-========================================================= */
-
-#readingInput {
-
-    width: 300px;
-
-    max-width: 90vw;
-
-    padding: 11px;
-
-    border: 0;
-
-    border-radius: 6px;
-
+.controls input {
+    width: 180px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
     font-size: 16px;
 }
 
-
-/* =========================================================
-   CONTROL BUTTONS
-========================================================= */
-
-.control {
-
-    background: #10b981;
-
-    color: #fff;
+.controls button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 5px;
+    background: #222;
+    color: white;
+    cursor: pointer;
 }
 
-.control:hover {
-
-    background: #059669;
+.controls button:hover {
+    background: #444;
 }
 
-
-/* =========================================================
-   COLOR PICKER
-========================================================= */
-
-#digitColor {
-
-    width: 42px;
-
-    height: 38px;
-
+.controls input[type="color"] {
+    width: 50px;
+    height: 40px;
     padding: 2px;
 }
 
-
-/* =========================================================
-   EDITOR
-========================================================= */
-
-.editor {
-
-    width: min(1000px, calc(100% - 30px));
-
-    margin: auto;
-
-    padding-bottom: 40px;
-}
-
-
-/* =========================================================
+/* =========================
    METER AREA
-========================================================= */
+========================= */
 
 #meterArea {
-
     position: relative;
 
     width: fit-content;
-
     max-width: 100%;
 
-    margin: auto;
+    margin: 0 auto;
 
-    border: 8px solid white;
-
-    border-radius: 16px;
+    border: 8px solid #222;
 
     overflow: hidden;
 
-    background: #222;
     touch-action: none;
 
-    /*
-       Important for mobile touch.
-    */
-
-    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-
-/* =========================================================
-   METER IMAGE
-========================================================= */
-
 #meterImage {
-
     display: block;
 
     width: auto;
-
-    max-width: min(900px, calc(100vw - 50px));
-
-    max-height: 75vh;
-
     height: auto;
 
-    user-select: none;
-
-    -webkit-user-drag: none;
+    max-width: min(900px, calc(100vw - 50px));
+    max-height: 75vh;
 
     pointer-events: none;
+
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-
-/* =========================================================
-   DIGIT LAYER
-========================================================= */
-
 #digitLayer {
-
     position: absolute;
 
     inset: 0;
 
     pointer-events: none;
+
+    overflow: hidden;
 }
 
-
-/* =========================================================
+/* =========================
    DIGIT GROUP
-========================================================= */
+========================= */
 
 .digit-group {
-
     position: absolute;
 
     display: flex;
 
     align-items: center;
 
-    gap: 3px;
-
-    padding: 2px;
+    gap: 5px;
 
     cursor: grab;
 
     pointer-events: auto;
 
-    /*
-       Important for phone.
-    */
-
     touch-action: none;
+
+    user-select: none;
+    -webkit-user-select: none;
 
     transform-origin: center center;
 
-    user-select: none;
+    z-index: 20;
 
-    -webkit-user-select: none;
-
-    z-index: 10;
+    --digit-color: #111;
 }
 
 .digit-group.dragging {
-
     cursor: grabbing;
 }
 
-
-/* =========================================================
-   7 SEGMENT DIGIT
-========================================================= */
+/* =========================
+   SEVEN SEGMENT DIGIT
+========================= */
 
 .seven-digit {
-
-    --digit-color: #30352f;
-
     position: relative;
 
     width: 28px;
-
     height: 48px;
 
-    flex: 0 0 28px;
+    flex-shrink: 0;
 }
 
+/* All segments */
 
-/* =========================================================
-   SEGMENTS
-========================================================= */
-
-.seg {
-
+.seven-digit span {
     position: absolute;
 
-    background: rgba(45, 50, 45, 0.10);
-
-    border-radius: 3px;
-}
-
-.seg.on {
+    display: block;
 
     background: var(--digit-color);
 
-    box-shadow:
-        0 0 1px rgba(0, 0, 0, 0.8);
+    border-radius: 3px;
+
+    opacity: 0.95;
 }
 
+/* Horizontal */
 
-/* =========================================================
-   HORIZONTAL SEGMENTS
-========================================================= */
-
-.seg.a,
-.seg.d,
-.seg.g {
-
-    width: 19px;
-
+.seven-digit .a,
+.seven-digit .g,
+.seven-digit .d {
+    width: 20px;
     height: 5px;
 
-    left: 4.5px;
+    left: 4px;
 }
 
-.seg.a {
+/* Vertical */
 
-    top: 1px;
-}
-
-.seg.g {
-
-    top: 21.5px;
-}
-
-.seg.d {
-
-    bottom: 1px;
-}
-
-
-/* =========================================================
-   VERTICAL SEGMENTS
-========================================================= */
-
-.seg.b,
-.seg.c,
-.seg.e,
-.seg.f {
-
+.seven-digit .f,
+.seven-digit .b,
+.seven-digit .e,
+.seven-digit .c {
     width: 5px;
-
-    height: 19px;
+    height: 18px;
 }
 
-.seg.f {
+/* Positions */
 
+.seven-digit .a {
+    top: 0;
+}
+
+.seven-digit .g {
+    top: 21px;
+}
+
+.seven-digit .d {
+    bottom: 0;
+}
+
+.seven-digit .f {
     left: 0;
-
-    top: 4px;
+    top: 3px;
 }
 
-.seg.b {
-
+.seven-digit .b {
     right: 0;
-
-    top: 4px;
+    top: 3px;
 }
 
-.seg.e {
-
+.seven-digit .e {
     left: 0;
-
-    bottom: 4px;
+    bottom: 3px;
 }
 
-.seg.c {
-
+.seven-digit .c {
     right: 0;
-
-    bottom: 4px;
+    bottom: 3px;
 }
 
+/* OFF segment */
 
-/* =========================================================
-   HINT
-========================================================= */
-
-.hint {
-
-    text-align: center;
-
-    color: #cbd5e1;
-
-    font-size: 14px;
-
-    line-height: 1.5;
-
-    margin-top: 10px;
+.seven-digit span {
+    opacity: 0;
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status {
-
-    text-align: center;
-
-    color: #94a3b8;
-
-    font-size: 13px;
-
-    min-height: 18px;
-
-    margin-top: 6px;
+.seven-digit span.on {
+    opacity: 0.95;
 }
 
-
-/* =========================================================
-   MOBILE CSS
-========================================================= */
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 600px) {
 
-    h1 {
-
-        font-size: 24px;
-
-        margin: 15px 0;
+    .container {
+        padding: 8px;
+        margin-top: 10px;
     }
 
+    h1 {
+        font-size: 22px;
+    }
+
+    .meter-buttons {
+        gap: 5px;
+    }
+
+    .meter-buttons button {
+        padding: 7px 9px;
+        font-size: 13px;
+    }
 
     .controls {
-
-        width: calc(100% - 20px);
+        gap: 6px;
     }
 
-
-    .editor {
-
-        width: calc(100% - 20px);
+    .controls input {
+        width: 150px;
     }
-
 
     #meterArea {
-
         border-width: 5px;
     }
 
-
     #meterImage {
-
-        max-width: calc(100vw - 30px);
-
-        max-height: 75vh;
+        max-width: calc(100vw - 26px);
+        max-height: 70vh;
     }
 
-
-    /*
-       Mobile digits slightly smaller
-    */
+    .digit-group {
+        gap: 3px;
+    }
 
     .seven-digit {
-
         width: 22px;
-
         height: 38px;
-
-        flex-basis: 22px;
     }
 
-
-    .seg.a,
-    .seg.d,
-    .seg.g {
-
+    .seven-digit .a,
+    .seven-digit .g,
+    .seven-digit .d {
         width: 15px;
-
         height: 4px;
 
         left: 3.5px;
     }
 
-
-    .seg.a {
-
-        top: 1px;
+    .seven-digit .f,
+    .seven-digit .b,
+    .seven-digit .e,
+    .seven-digit .c {
+        width: 4px;
+        height: 14px;
     }
 
-
-    .seg.g {
-
+    .seven-digit .g {
         top: 17px;
     }
 
-
-    .seg.d {
-
-        bottom: 1px;
-    }
-
-
-    .seg.b,
-    .seg.c,
-    .seg.e,
-    .seg.f {
-
-        width: 4px;
-
-        height: 15px;
-    }
-
-
-    .seg.f {
-
+    .seven-digit .f {
         left: 0;
-
-        top: 3px;
+        top: 2px;
     }
 
-
-    .seg.b {
-
+    .seven-digit .b {
         right: 0;
-
-        top: 3px;
+        top: 2px;
     }
 
-
-    .seg.e {
-
+    .seven-digit .e {
         left: 0;
-
-        bottom: 3px;
+        bottom: 2px;
     }
 
-
-    .seg.c {
-
+    .seven-digit .c {
         right: 0;
-
-        bottom: 3px;
+        bottom: 2px;
     }
-
-
-    .hint {
-
-        font-size: 13px;
-    }
-
 }
 
+#status {
+    text-align: center;
+    margin-top: 10px;
+    color: #555;
+    font-size: 14px;
+}
+
+.hint {
+    text-align: center;
+    margin-top: 10px;
+    color: #666;
+    font-size: 14px;
+}
 </style>
-
 </head>
-
 
 <body>
 
+<div class="container">
 
-<h1>
-    Smart Meter Digit Editor
-</h1>
+    <h1>Smart Meter Digit Editor</h1>
 
+    <!-- =========================
+         METER BUTTONS
+    ========================== -->
 
-<!-- =====================================================
-     METER BUTTONS
-===================================================== -->
+    <div class="meter-buttons">
 
-<div
-    class="meter-buttons"
-    id="meterButtons"
-></div>
+        <button data-meter="1">1</button>
+        <button data-meter="2">2</button>
+        <button data-meter="3">3</button>
+        <button data-meter="4">4</button>
+        <button data-meter="5">5</button>
+        <button data-meter="6">6</button>
+        <button data-meter="7">7</button>
+        <button data-meter="8">8</button>
+        <button data-meter="9">9</button>
+        <button data-meter="10">10</button>
+        <button data-meter="11">11</button>
+        <button data-meter="12">12</button>
+        <button data-meter="13">13</button>
+        <button data-meter="14">14</button>
+        <button data-meter="15">15</button>
 
+    </div>
 
-<!-- =====================================================
-     CONTROLS
-===================================================== -->
+    <!-- =========================
+         CONTROLS
+    ========================== -->
 
-<div class="controls">
+    <div class="controls">
 
+        <input
+            type="text"
+            id="readingInput"
+            placeholder="Enter digits"
+            inputmode="numeric"
+        >
 
-    <input
-        id="readingInput"
-        type="text"
-        inputmode="numeric"
-        placeholder="Enter digits"
-        autocomplete="off"
-    >
+        <button id="updateBtn">
+            Update
+        </button>
 
+        <button id="plusBtn">
+            A+
+        </button>
 
-    <button
-        class="control"
-        id="updateBtn"
-    >
-        Update Digit
-    </button>
+        <button id="minusBtn">
+            A-
+        </button>
 
+        <input
+            type="color"
+            id="digitColor"
+            value="#111111"
+            title="Digit Color"
+        >
 
-    <button
-        class="control"
-        id="plusBtn"
-    >
-        A+
-    </button>
+        <button id="resetBtn">
+            Reset
+        </button>
 
+    </div>
 
-    <button
-        class="control"
-        id="minusBtn"
-    >
-        A-
-    </button>
-
-
-    <input
-        id="digitColor"
-        type="color"
-        value="#30352f"
-        title="Digit color"
-    >
-
-
-    <button
-        class="control"
-        id="resetBtn"
-    >
-        Reset
-    </button>
-
-</div>
-
-
-<!-- =====================================================
-     METER EDITOR
-===================================================== -->
-
-<div class="editor">
-
+    <!-- =========================
+         METER
+    ========================== -->
 
     <div id="meterArea">
 
-
         <img
             id="meterImage"
-            alt="Electric meter"
+            src=""
+            alt="Meter"
         >
-
 
         <div id="digitLayer"></div>
 
-
     </div>
 
+    <div id="status">
+        Ready
+    </div>
 
     <div class="hint">
-
-        📱 Phone:
-        1 finger = move digits |
-        2 fingers pinch = resize
-
-        <br>
-
-        💻 Computer:
-        mouse drag = move |
-        A+ / A- = resize
-
+        📱 Phone: 1 finger = Move &nbsp; | &nbsp;
+        🤏 2 fingers pinch = Zoom In / Zoom Out
     </div>
-
-
-    <div
-        class="status"
-        id="status"
-    ></div>
-
 
 </div>
 
 
-
 <script>
-
 
 /* =========================================================
    METER IMAGES
@@ -719,149 +488,61 @@ button {
 
 const meterImages = {
 
-    1:
-        "./genus-solar-meter-250x250.webp",
+    1: "./genus-solar-meter-250x250.webp",
 
-    2:
-        "WhatsApp Image 2026-06-12 at 8.35.39 AM (1).jpeg",
+    2: "WhatsApp Image 2026-06-12 at 8.35.39 AM (1).jpeg",
 
-    3:
-        "WhatsApp Image 2026-06-12 at 8.35.39 AM.jpeg",
+    3: "WhatsApp Image 2026-06-12 at 8.35.39 AM.jpeg",
 
-    4:
-        "WhatsApp Image 2026-06-22 at 4.17.11 PM.jpeg",
+    4: "WhatsApp Image 2026-06-22 at 4.17.11 PM.jpeg",
 
-    5:
-        "WhatsApp Image 2026-06-22 at 4.17.12 PM (1).jpeg",
+    5: "WhatsApp Image 2026-06-22 at 4.17.12 PM (1).jpeg",
 
-    6:
-        "WhatsApp Image 2026-06-22 at 4.17.12 PM.jpeg",
+    6: "WhatsApp Image 2026-06-22 at 4.17.12 PM.jpeg",
 
-    7:
-        "WhatsApp Image 2026-06-22 at 4.17.13 PM.jpeg",
+    7: "WhatsApp Image 2026-06-22 at 4.17.13 PM.jpeg",
 
-    8:
-        "WhatsApp Image 2026-06-22 at 4.17.14 PM (1).jpeg",
+    8: "WhatsApp Image 2026-06-22 at 4.17.14 PM (1).jpeg",
 
-    9:
-        "WhatsApp Image 2026-06-22 at 4.17.14 PM.jpeg",
+    9: "WhatsApp Image 2026-06-22 at 4.17.14 PM.jpeg",
 
-    10:
-        "WhatsApp Image 2026-06-22 at 4.17.15 PM (1).jpeg",
+    10: "WhatsApp Image 2026-06-22 at 4.17.15 PM (1).jpeg",
 
-    11:
-        "WhatsApp Image 2026-06-22 at 4.17.15 PM.jpeg",
+    11: "WhatsApp Image 2026-06-22 at 4.17.15 PM.jpeg",
 
-    12:
-        "WhatsApp Image 2026-06-22 at 4.17.16 PM (1).jpeg",
+    12: "WhatsApp Image 2026-06-22 at 4.17.16 PM (1).jpeg",
 
-    13:
-        "WhatsApp Image 2026-06-22 at 4.17.16 PM.jpeg",
+    13: "WhatsApp Image 2026-06-22 at 4.17.16 PM.jpeg",
 
-    14:
-        "WhatsApp Image 2026-06-22 at 4.17.17 PM (1).jpeg",
+    14: "WhatsApp Image 2026-06-22 at 4.17.17 PM (1).jpeg",
 
-    15:
-        "WhatsApp Image 2026-06-22 at 4.17.17 PM.jpeg"
-
+    15: "WhatsApp Image 2026-06-22 at 4.17.17 PM.jpeg"
 };
 
 
 /* =========================================================
-   7 SEGMENT DIGIT DEFINITIONS
-
-   a = top
-   b = upper right
-   c = lower right
-   d = bottom
-   e = lower left
-   f = upper left
-   g = middle
+   ELEMENTS
 ========================================================= */
 
-const segmentMap = {
+const meterImage = document.getElementById("meterImage");
+const meterArea = document.getElementById("meterArea");
+const digitLayer = document.getElementById("digitLayer");
 
-    "0":
-        ["a", "b", "c", "d", "e", "f"],
+const readingInput = document.getElementById("readingInput");
 
-    "1":
-        ["b", "c"],
+const updateBtn = document.getElementById("updateBtn");
+const plusBtn = document.getElementById("plusBtn");
+const minusBtn = document.getElementById("minusBtn");
 
-    "2":
-        ["a", "b", "g", "e", "d"],
+const digitColor = document.getElementById("digitColor");
 
-    "3":
-        ["a", "b", "c", "d", "g"],
+const resetBtn = document.getElementById("resetBtn");
 
-    "4":
-        ["f", "g", "b", "c"],
-
-    "5":
-        ["a", "f", "g", "c", "d"],
-
-    "6":
-        ["a", "f", "g", "e", "c", "d"],
-
-    "7":
-        ["a", "b", "c"],
-
-    "8":
-        ["a", "b", "c", "d", "e", "f", "g"],
-
-    "9":
-        ["a", "b", "c", "d", "f", "g"]
-
-};
+const status = document.getElementById("status");
 
 
 /* =========================================================
-   GET ELEMENTS
-========================================================= */
-
-const meterButtons =
-    document.getElementById(
-        "meterButtons"
-    );
-
-
-const meterImage =
-    document.getElementById(
-        "meterImage"
-    );
-
-
-const meterArea =
-    document.getElementById(
-        "meterArea"
-    );
-
-
-const digitLayer =
-    document.getElementById(
-        "digitLayer"
-    );
-
-
-const readingInput =
-    document.getElementById(
-        "readingInput"
-    );
-
-
-const digitColor =
-    document.getElementById(
-        "digitColor"
-    );
-
-
-const status =
-    document.getElementById(
-        "status"
-    );
-
-
-/* =========================================================
-   GLOBAL VARIABLES
+   VARIABLES
 ========================================================= */
 
 let digitGroup = null;
@@ -869,127 +550,97 @@ let digitGroup = null;
 let scale = 1;
 
 let currentX = 0;
-
 let currentY = 0;
 
 
 /* =========================================================
-   CREATE METER 1 - 15 BUTTONS
+   SEVEN SEGMENT MAP
 ========================================================= */
 
-for (
-    let i = 1;
-    i <= 15;
-    i++
-) {
+const segmentMap = {
+
+    0: ["a", "b", "c", "d", "e", "f"],
+
+    1: ["b", "c"],
+
+    2: ["a", "b", "g", "e", "d"],
+
+    3: ["a", "b", "c", "d", "g"],
+
+    4: ["f", "g", "b", "c"],
+
+    5: ["a", "f", "g", "c", "d"],
+
+    6: ["a", "f", "g", "e", "c", "d"],
+
+    7: ["a", "b", "c"],
+
+    8: ["a", "b", "c", "d", "e", "f", "g"],
+
+    9: ["a", "b", "c", "d", "f", "g"]
+
+};
 
 
-    const button =
-        document.createElement(
-            "button"
-        );
+/* =========================================================
+   METER BUTTONS
+========================================================= */
 
+document.querySelectorAll("[data-meter]").forEach(button => {
 
-    button.textContent =
-        "Meter " + i;
+    button.addEventListener("click", () => {
 
+        const meterNumber = button.dataset.meter;
 
-    button.onclick = () => {
+        meterImage.src = meterImages[meterNumber];
 
+        status.textContent = "Loading meter...";
 
-        if (!meterImages[i]) {
+        meterImage.onload = () => {
 
             status.textContent =
-                "Meter " +
-                i +
-                " image is not configured yet.";
+                "Meter " + meterNumber + " loaded";
 
-            return;
-        }
+            resetPosition();
 
+        };
 
-        /*
-           Image loaded
-        */
+        meterImage.onerror = () => {
 
-        meterImage.onload =
-            () => {
+            status.textContent =
+                "Meter image not found";
 
-                status.textContent =
-                    "Meter " +
-                    i +
-                    " loaded.";
+        };
 
-                resetPosition();
+    });
 
-            };
-
-
-        /*
-           Image error
-        */
-
-        meterImage.onerror =
-            () => {
-
-                status.textContent =
-                    "Image not found: " +
-                    meterImages[i];
-
-            };
-
-
-        /*
-           Change image
-        */
-
-        meterImage.src =
-            meterImages[i];
-
-    };
-
-
-    meterButtons.appendChild(
-        button
-    );
-
-}
+});
 
 
 /* =========================================================
    LOAD FIRST METER
 ========================================================= */
 
-meterImage.src =
-    meterImages[1];
+meterImage.src = meterImages[1];
+
+meterImage.onload = () => {
+
+    status.textContent = "Meter 1 loaded";
+
+};
 
 
 /* =========================================================
-   CREATE ONE 7 SEGMENT DIGIT
+   CREATE ONE DIGIT
 ========================================================= */
 
 function makeDigit(number) {
 
+    const digit = document.createElement("div");
 
-    const digit =
-        document.createElement(
-            "div"
-        );
+    digit.className = "seven-digit";
 
-
-    digit.className =
-        "seven-digit";
-
-
-    const activeSegments =
-        segmentMap[number];
-
-
-    /*
-       Create all 7 segments
-    */
-
-    [
+    const segments = [
         "a",
         "b",
         "c",
@@ -997,46 +648,25 @@ function makeDigit(number) {
         "e",
         "f",
         "g"
+    ];
 
-    ].forEach(
-        segmentName => {
+    segments.forEach(segmentName => {
 
+        const segment = document.createElement("span");
 
-            const segment =
-                document.createElement(
-                    "span"
-                );
+        segment.className = segmentName;
 
+        if (
+            segmentMap[number].includes(segmentName)
+        ) {
 
-            segment.className =
-                "seg " +
-                segmentName;
-
-
-            /*
-               Turn segment ON
-            */
-
-            if (
-                activeSegments.includes(
-                    segmentName
-                )
-            ) {
-
-                segment.classList.add(
-                    "on"
-                );
-
-            }
-
-
-            digit.appendChild(
-                segment
-            );
+            segment.classList.add("on");
 
         }
-    );
 
+        digit.appendChild(segment);
+
+    });
 
     return digit;
 
@@ -1044,157 +674,72 @@ function makeDigit(number) {
 
 
 /* =========================================================
-   CREATE COMPLETE READING
+   CREATE DIGITS
 ========================================================= */
 
 function createDigits(value) {
 
-
-    /*
-       Remove old digits
-    */
-
     digitLayer.innerHTML = "";
 
-    digitGroup = null;
+    const cleanValue = String(value).replace(/\D/g, "");
 
+    if (!cleanValue) {
 
-    /*
-       Empty input
-    */
-
-    if (!value) {
-
-        status.textContent =
-            "Enter a reading first.";
+        digitGroup = null;
 
         return;
+
     }
 
+    digitGroup = document.createElement("div");
 
-    /*
-       Only numbers
-    */
+    digitGroup.className = "digit-group";
 
-    if (!/^\d+$/.test(value)) {
+    cleanValue.split("").forEach(number => {
 
-        status.textContent =
-            "Only numbers are allowed.";
-
-        return;
-    }
-
-
-    /*
-       Create group
-    */
-
-    digitGroup =
-        document.createElement(
-            "div"
+        digitGroup.appendChild(
+            makeDigit(Number(number))
         );
 
+    });
 
-    digitGroup.className =
-        "digit-group";
-
-
-    /*
-       Create every digit
-    */
-
-    [...value].forEach(
-        number => {
-
-            digitGroup.appendChild(
-                makeDigit(number)
-            );
-
-        }
-    );
-
-
-    /*
-       Add group to meter
-    */
-
-    digitLayer.appendChild(
-        digitGroup
-    );
-
-
-    /*
-       Default size
-    */
+    digitLayer.appendChild(digitGroup);
 
     scale = 1;
 
-
-    /*
-       Apply color
-    */
-
-    setColor();
-
-
-    /*
-       Put in center
-    */
+    digitGroup.style.setProperty(
+        "--digit-color",
+        digitColor.value
+    );
 
     resetPosition();
 
-
-    /*
-       Enable mobile interaction
-    */
-
-    enableTouchDragAndPinch(
-        digitGroup
-    );
-
-
-    status.textContent =
-        "Reading " +
-        value +
-        " added.";
+    enableMouseDragAndTouchPinch(digitGroup);
 
 }
 
 
 /* =========================================================
-   RESET DIGIT POSITION
+   RESET POSITION
 ========================================================= */
 
 function resetPosition() {
 
-
     if (!digitGroup) {
-
         return;
     }
 
+    const areaWidth = meterArea.clientWidth;
+    const areaHeight = meterArea.clientHeight;
 
-    /*
-       Center horizontally
-    */
+    const groupWidth = digitGroup.offsetWidth;
+    const groupHeight = digitGroup.offsetHeight;
 
     currentX =
-        (
-            meterArea.clientWidth -
-            digitGroup.offsetWidth
-        ) / 2;
-
-
-    /*
-       Center vertically
-    */
+        (areaWidth - groupWidth) / 2;
 
     currentY =
-        (
-            meterArea.clientHeight -
-            digitGroup.offsetHeight
-        ) / 2;
-
+        (areaHeight - groupHeight) / 2;
 
     apply();
 
@@ -1207,44 +752,107 @@ function resetPosition() {
 
 function apply() {
 
-
     if (!digitGroup) {
-
         return;
     }
-
 
     digitGroup.style.left =
         currentX + "px";
 
-
     digitGroup.style.top =
         currentY + "px";
 
-
     digitGroup.style.transform =
-        "scale(" +
-        scale +
-        ")";
+        "scale(" + scale + ")";
 
 }
 
 
 /* =========================================================
-   MOBILE + DESKTOP INTERACTION
-
-   1 FINGER:
-       Move digit
-
-   2 FINGERS:
-       Pinch to resize
+   IMPORTANT:
+   MOUSE DRAG + MOBILE TOUCH PINCH
 ========================================================= */
-function enableTouchDragAndPinch(element) {
 
-    let pointers = new Map();
+function enableMouseDragAndTouchPinch(element) {
 
-    let startX = 0;
-    let startY = 0;
+
+    /* =====================================================
+       DESKTOP MOUSE DRAG
+    ===================================================== */
+
+    let mouseDown = false;
+
+    let mouseStartX = 0;
+    let mouseStartY = 0;
+
+    let mouseOriginalX = 0;
+    let mouseOriginalY = 0;
+
+
+    element.addEventListener("mousedown", function(event) {
+
+        /*
+         * Only mouse.
+         * Touch is handled separately below.
+         */
+
+        if (event.button !== 0) {
+            return;
+        }
+
+        event.preventDefault();
+
+        mouseDown = true;
+
+        mouseStartX = event.clientX;
+        mouseStartY = event.clientY;
+
+        mouseOriginalX = currentX;
+        mouseOriginalY = currentY;
+
+        element.classList.add("dragging");
+
+    });
+
+
+    document.addEventListener("mousemove", function(event) {
+
+        if (!mouseDown) {
+            return;
+        }
+
+        currentX =
+            mouseOriginalX +
+            (event.clientX - mouseStartX);
+
+        currentY =
+            mouseOriginalY +
+            (event.clientY - mouseStartY);
+
+        apply();
+
+    });
+
+
+    document.addEventListener("mouseup", function() {
+
+        if (!mouseDown) {
+            return;
+        }
+
+        mouseDown = false;
+
+        element.classList.remove("dragging");
+
+    });
+
+
+    /* =====================================================
+       MOBILE TOUCH
+    ===================================================== */
+
+    let touchStartX = 0;
+    let touchStartY = 0;
 
     let originalX = 0;
     let originalY = 0;
@@ -1253,62 +861,53 @@ function enableTouchDragAndPinch(element) {
     let pinchStartScale = 1;
 
 
-    // =========================================
-    // Calculate distance between two fingers
-    // =========================================
+    /* -----------------------------------------------------
+       DISTANCE BETWEEN TWO FINGERS
+    ----------------------------------------------------- */
 
-    function getDistance() {
+    function getTouchDistance(touch1, touch2) {
 
-        const points = [...pointers.values()];
+        const dx =
+            touch1.clientX -
+            touch2.clientX;
 
-        if (points.length < 2) {
-            return 0;
-        }
-
-        const x =
-            points[0].x -
-            points[1].x;
-
-        const y =
-            points[0].y -
-            points[1].y;
+        const dy =
+            touch1.clientY -
+            touch2.clientY;
 
         return Math.sqrt(
-            x * x + y * y
+            dx * dx +
+            dy * dy
         );
+
     }
 
 
-    // =========================================
-    // POINTER DOWN
-    // =========================================
+    /* -----------------------------------------------------
+       TOUCH START
+    ----------------------------------------------------- */
 
     element.addEventListener(
-        "pointerdown",
-        function (event) {
+        "touchstart",
+        function(event) {
 
             event.preventDefault();
 
-            pointers.set(
-                event.pointerId,
-                {
-                    x: event.clientX,
-                    y: event.clientY
-                }
-            );
+            /*
+             * ONE FINGER
+             * = MOVE
+             */
 
+            if (event.touches.length === 1) {
 
-            // -------------------------------
-            // ONE FINGER
-            // -------------------------------
+                const touch =
+                    event.touches[0];
 
-            if (pointers.size === 1) {
+                touchStartX =
+                    touch.clientX;
 
-                startX =
-                    event.clientX;
-
-                startY =
-                    event.clientY;
+                touchStartY =
+                    touch.clientY;
 
                 originalX =
                     currentX;
@@ -1316,20 +915,29 @@ function enableTouchDragAndPinch(element) {
                 originalY =
                     currentY;
 
-                element.classList.add(
-                    "dragging"
-                );
+                element.classList.add("dragging");
+
             }
 
 
-            // -------------------------------
-            // TWO FINGERS
-            // -------------------------------
+            /*
+             * TWO FINGERS
+             * = PINCH ZOOM
+             */
 
-            if (pointers.size === 2) {
+            if (event.touches.length === 2) {
+
+                const touch1 =
+                    event.touches[0];
+
+                const touch2 =
+                    event.touches[1];
 
                 pinchStartDistance =
-                    getDistance();
+                    getTouchDistance(
+                        touch1,
+                        touch2
+                    );
 
                 pinchStartScale =
                     scale;
@@ -1337,65 +945,48 @@ function enableTouchDragAndPinch(element) {
                 element.classList.remove(
                     "dragging"
                 );
+
             }
 
-
-            try {
-
-                element.setPointerCapture(
-                    event.pointerId
-                );
-
-            } catch (error) {}
-
+        },
+        {
+            passive: false
         }
     );
 
 
-    // =========================================
-    // POINTER MOVE
-    // =========================================
+    /* -----------------------------------------------------
+       TOUCH MOVE
+    ----------------------------------------------------- */
 
     element.addEventListener(
-        "pointermove",
-        function (event) {
+        "touchmove",
+        function(event) {
 
-            if (
-                !pointers.has(
-                    event.pointerId
-                )
-            ) {
-
-                return;
-            }
+            event.preventDefault();
 
 
             /*
-             Update current finger position
-            */
+             * TWO FINGERS
+             * PINCH ZOOM
+             */
 
-            pointers.set(
-                event.pointerId,
-                {
-                    x: event.clientX,
-                    y: event.clientY
-                }
-            );
+            if (event.touches.length === 2) {
 
+                const touch1 =
+                    event.touches[0];
 
-            // =================================
-            // TWO FINGERS = PINCH ZOOM
-            // =================================
-
-            if (pointers.size === 2) {
+                const touch2 =
+                    event.touches[1];
 
                 const currentDistance =
-                    getDistance();
+                    getTouchDistance(
+                        touch1,
+                        touch2
+                    );
 
 
-                if (
-                    pinchStartDistance > 0
-                ) {
+                if (pinchStartDistance > 0) {
 
                     const zoomRatio =
                         currentDistance /
@@ -1408,8 +999,8 @@ function enableTouchDragAndPinch(element) {
 
 
                     /*
-                     Minimum size
-                    */
+                     * Minimum size
+                     */
 
                     if (scale < 0.3) {
 
@@ -1419,8 +1010,8 @@ function enableTouchDragAndPinch(element) {
 
 
                     /*
-                     Maximum size
-                    */
+                     * Maximum size
+                     */
 
                     if (scale > 4) {
 
@@ -1433,57 +1024,119 @@ function enableTouchDragAndPinch(element) {
 
                 }
 
-
                 return;
+
             }
 
 
-            // =================================
-            // ONE FINGER = DRAG
-            // =================================
+            /*
+             * ONE FINGER
+             * MOVE DIGITS
+             */
 
-            if (pointers.size === 1) {
+            if (event.touches.length === 1) {
+
+                const touch =
+                    event.touches[0];
 
                 currentX =
                     originalX +
                     (
-                        event.clientX -
-                        startX
+                        touch.clientX -
+                        touchStartX
                     );
-
 
                 currentY =
                     originalY +
                     (
-                        event.clientY -
-                        startY
+                        touch.clientY -
+                        touchStartY
                     );
-
 
                 apply();
 
             }
 
+        },
+        {
+            passive: false
         }
     );
 
 
-    // =========================================
-    // POINTER UP
-    // =========================================
+    /* -----------------------------------------------------
+       TOUCH END
+    ----------------------------------------------------- */
 
-    function pointerEnd(event) {
+    element.addEventListener(
+        "touchend",
+        function(event) {
 
-        pointers.delete(
-            event.pointerId
-        );
+            event.preventDefault();
 
 
-        // -------------------------------
-        // NO FINGER
-        // -------------------------------
+            /*
+             * ALL FINGERS REMOVED
+             */
 
-        if (pointers.size === 0) {
+            if (event.touches.length === 0) {
+
+                element.classList.remove(
+                    "dragging"
+                );
+
+                pinchStartDistance = 0;
+
+                return;
+
+            }
+
+
+            /*
+             * PINCH FINISHED
+             *
+             * If one finger remains,
+             * make that finger the new
+             * starting point for dragging.
+             */
+
+            if (event.touches.length === 1) {
+
+                const remainingTouch =
+                    event.touches[0];
+
+                touchStartX =
+                    remainingTouch.clientX;
+
+                touchStartY =
+                    remainingTouch.clientY;
+
+                originalX =
+                    currentX;
+
+                originalY =
+                    currentY;
+
+                pinchStartDistance = 0;
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       TOUCH CANCEL
+    ----------------------------------------------------- */
+
+    element.addEventListener(
+        "touchcancel",
+        function(event) {
+
+            event.preventDefault();
 
             element.classList.remove(
                 "dragging"
@@ -1491,258 +1144,174 @@ function enableTouchDragAndPinch(element) {
 
             pinchStartDistance = 0;
 
+        },
+        {
+            passive: false
         }
-
-
-        // -------------------------------
-        // ONE FINGER LEFT
-        // -------------------------------
-
-        if (pointers.size === 1) {
-
-            const remaining =
-                [...pointers.values()][0];
-
-
-            startX =
-                remaining.x;
-
-            startY =
-                remaining.y;
-
-
-            originalX =
-                currentX;
-
-            originalY =
-                currentY;
-
-
-            /*
-             Next movement will again
-             work as normal dragging
-            */
-
-        }
-
-
-        try {
-
-            element.releasePointerCapture(
-                event.pointerId
-            );
-
-        } catch (error) {}
-
-    }
-
-
-    // =========================================
-    // POINTER UP
-    // =========================================
-
-    element.addEventListener(
-        "pointerup",
-        pointerEnd
-    );
-
-
-    // =========================================
-    // POINTER CANCEL
-    // =========================================
-
-    element.addEventListener(
-        "pointercancel",
-        pointerEnd
     );
 
 }
 
 
 /* =========================================================
-   DIGIT COLOR
+   UPDATE BUTTON
 ========================================================= */
 
-function setColor() {
+updateBtn.addEventListener("click", function() {
 
+    const value =
+        readingInput.value.trim();
 
-    if (!digitGroup) {
+    if (!value) {
+
+        alert("Please enter digits.");
 
         return;
+
     }
 
+    if (!/^\d+$/.test(value)) {
 
-    digitGroup
-        .querySelectorAll(
-            ".seven-digit"
-        )
-        .forEach(
-            digit => {
-
-
-                digit.style.setProperty(
-                    "--digit-color",
-                    digitColor.value
-                );
-
-            }
+        alert(
+            "Please enter numbers only."
         );
 
-}
+        return;
 
+    }
 
-/* =========================================================
-   UPDATE DIGIT BUTTON
-========================================================= */
+    createDigits(value);
 
-document
-    .getElementById(
-        "updateBtn"
-    )
-    .onclick =
-    () => {
-
-
-        createDigits(
-            readingInput.value.trim()
-        );
-
-    };
+});
 
 
 /* =========================================================
    ENTER KEY
 ========================================================= */
 
-readingInput.onkeydown =
-    event => {
+readingInput.addEventListener(
+    "keydown",
+    function(event) {
 
+        if (event.key === "Enter") {
 
-        if (
-            event.key === "Enter"
-        ) {
-
-
-            createDigits(
-                readingInput.value.trim()
-            );
+            updateBtn.click();
 
         }
 
-    };
+    }
+);
 
 
 /* =========================================================
    A+ BUTTON
 ========================================================= */
 
-document
-    .getElementById(
-        "plusBtn"
-    )
-    .onclick =
-    () => {
+plusBtn.addEventListener("click", function() {
 
+    if (!digitGroup) {
+        return;
+    }
 
-        if (!digitGroup) {
+    scale += 0.1;
 
-            return;
-        }
+    if (scale > 4) {
+        scale = 4;
+    }
 
+    apply();
 
-        scale =
-            Math.min(
-                4,
-                scale + 0.1
-            );
-
-
-        apply();
-
-    };
+});
 
 
 /* =========================================================
    A- BUTTON
 ========================================================= */
 
-document
-    .getElementById(
-        "minusBtn"
-    )
-    .onclick =
-    () => {
+minusBtn.addEventListener("click", function() {
 
+    if (!digitGroup) {
+        return;
+    }
+
+    scale -= 0.1;
+
+    if (scale < 0.3) {
+        scale = 0.3;
+    }
+
+    apply();
+
+});
+
+
+/* =========================================================
+   COLOR
+========================================================= */
+
+digitColor.addEventListener(
+    "input",
+    function() {
 
         if (!digitGroup) {
-
             return;
         }
 
+        digitGroup.style.setProperty(
+            "--digit-color",
+            digitColor.value
+        );
 
-        scale =
-            Math.max(
-                0.3,
-                scale - 0.1
-            );
-
-
-        apply();
-
-    };
+    }
+);
 
 
 /* =========================================================
-   COLOR PICKER
+   RESET
 ========================================================= */
 
-digitColor.oninput =
-    setColor;
+resetBtn.addEventListener("click", function() {
+
+    readingInput.value = "";
+
+    digitLayer.innerHTML = "";
+
+    digitGroup = null;
+
+    scale = 1;
+
+    currentX = 0;
+
+    currentY = 0;
+
+    status.textContent = "Reset";
+
+});
 
 
 /* =========================================================
-   RESET BUTTON
+   WINDOW RESIZE
 ========================================================= */
 
-document
-    .getElementById(
-        "resetBtn"
-    )
-    .onclick =
-    () => {
+window.addEventListener(
+    "resize",
+    function() {
 
+        if (digitGroup) {
 
-        readingInput.value = "";
+            /*
+             * Keep current position
+             * when screen changes.
+             */
 
+            apply();
 
-        digitLayer.innerHTML =
-            "";
+        }
 
-
-        digitGroup =
-            null;
-
-
-        scale =
-            1;
-
-
-        currentX =
-            0;
-
-
-        currentY =
-            0;
-
-
-        status.textContent =
-            "Reset complete.";
-
-    };
-
+    }
+);
 
 </script>
 
 </body>
-
 </html>
