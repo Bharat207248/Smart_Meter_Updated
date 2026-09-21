@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Meter Digit Editor</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #0f172a;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 30px;
+}
+
+.meter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 0 20px 18px;
+}
+
+button {
+    border: 0;
+    border-radius: 7px;
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.meter-buttons button {
+    background: #2563eb;
+    color: #fff;
+}
+
+.controls {
+    width: min(1000px, calc(100% - 30px));
+    margin: auto auto 20px;
+    padding: 14px;
+    background: #263247;
+    border-radius: 10px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#readingInput {
+    width: 300px;
+    max-width: 90vw;
+    padding: 11px;
+    border: 0;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.control {
+    background: #10b981;
+    color: #fff;
+}
+
+.control:hover {
+    background: #059669;
+}
+
+#digitColor {
+    width: 42px;
+    height: 38px;
+    padding: 2px;
+}
+
+.editor {
+    width: min(1000px, calc(100% - 30px));
+    margin: auto;
+    padding-bottom: 40px;
+}
+
+#meterArea {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: auto;
+    border: 8px solid white;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #222;
+    touch-action: none;
+}
+
+#meterImage {
+    display: block;
+    width: auto;
+    max-width: min(900px, calc(100vw - 50px));
+    max-height: 75vh;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#digitLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.digit-group {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px;
+    cursor: grab;
+    pointer-events: auto;
+    touch-action: none;
+    transform-origin: center center;
+    user-select: none;
+    z-index: 10;
+}
+
+.digit-group.dragging {
+    cursor: grabbing;
+}
+
+/* CSS 7-segment digit */
+
+.seven-digit {
+    --digit-color: #30352f;
+
+    position: relative;
+
+    width: 28px;
+    height: 48px;
+
+    flex: 0 0 28px;
+}
+
+.seg {
+    position: absolute;
+
+    background: rgba(45, 50, 45, 0.10);
+
+    border-radius: 3px;
+}
+
+.seg.on {
+    background: var(--digit-color);
+
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.8);
+}
+
+/* Horizontal segments */
+
+.seg.a,
+.seg.d,
+.seg.g {
+    width: 19px;
+    height: 5px;
+    left: 4.5px;
+}
+
+.seg.a {
+    top: 1px;
+}
+
+.seg.g {
+    top: 21.5px;
+}
+
+.seg.d {
+    bottom: 1px;
+}
+
+/* Vertical segments */
+
+.seg.b,
+.seg.c,
+.seg.e,
+.seg.f {
+    width: 5px;
+    height: 19px;
+}
+
+.seg.f {
+    left: 0;
+    top: 4px;
+}
+
+.seg.b {
+    right: 0;
+    top: 4px;
+}
+
+.seg.e {
+    left: 0;
+    bottom: 4px;
+}
+
+.seg.c {
+    right: 0;
+    bottom: 4px;
+}
+
+.hint,
+.status {
+    text-align: center;
+    color: #cbd5e1;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.status {
+    color: #94a3b8;
+    min-height: 18px;
+}
+</style>
+</head>
+
+
+<body>
+
+<h1>Smart Meter Digit Editor</h1>
+
+
+<!-- Meter Buttons -->
+
+<div class="meter-buttons" id="meterButtons"></div>
+
+
+<!-- Controls -->
+
+<div class="controls">
+
+    <input
+        id="readingInput"
+        type="text"
+        inputmode="numeric"
+        placeholder="Enter digits"
+        autocomplete="off"
+    >
+
+    <button class="control" id="updateBtn">
+        Update Digit
+    </button>
+
+    <button class="control" id="plusBtn">
+        A+
+    </button>
+
+    <button class="control" id="minusBtn">
+        A-
+    </button>
+
+    <input
+        id="digitColor"
+        type="color"
+        value="#30352f"
+        title="Digit color"
+    >
+
+    <button class="control" id="resetBtn">
+        Reset
+    </button>
+
+</div>
+
+
+<!-- Meter Editor -->
+
+<div class="editor">
+
+    <div id="meterArea">
+
+        <img
+            id="meterImage"
+            alt="Electric meter"
+        >
+
+        <div id="digitLayer"></div>
+
+    </div>
+
+
+    <div class="hint">
+        Enter reading → Update Digit → drag digits anywhere on the meter.
+        A+ / A- resize.
+    </div>
+
+
+    <div
+        class="status"
+        id="status"
+    ></div>
+
+</div>
+
+
+<script>
+
+/*
+===========================================================
+METER IMAGES
+===========================================================
+
+Meter 1 uses the image visible in your VS Code screenshot:
+
+genus-solar-meter-250x250.webp
+
+For other meters, put the REAL filename here.
+
+Example:
+
+2: "./meter2.jpg",
+3: "./meter3.jpg"
+
+===========================================================
+*/
+
+const meterImages = {
+
+    1: "./genus-solar-meter-250x250.webp",
+    2: "WhatsApp Image 2026-06-12 at 8.35.39 AM (1).jpeg",
+    3: "WhatsApp Image 2026-06-12 at 8.35.39 AM.jpeg",
+        4: "WhatsApp Image 2026-06-22 at 4.17.11 PM.jpeg",
+        5: "WhatsApp Image 2026-06-22 at 4.17.12 PM (1).jpeg",
+        6: "WhatsApp Image 2026-06-22 at 4.17.12 PM.jpeg",
+        7: "WhatsApp Image 2026-06-22 at 4.17.13 PM.jpeg",
+        8: "WhatsApp Image 2026-06-22 at 4.17.14 PM (1).jpeg",
+        9: "WhatsApp Image 2026-06-22 at 4.17.14 PM.jpeg",
+        10: "WhatsApp Image 2026-06-22 at 4.17.15 PM (1).jpeg",
+        11: "WhatsApp Image 2026-06-22 at 4.17.15 PM.jpeg",
+        12: "WhatsApp Image 2026-06-22 at 4.17.16 PM (1).jpeg",
+        13: "WhatsApp Image 2026-06-22 at 4.17.16 PM.jpeg",
+        14: "WhatsApp Image 2026-06-22 at 4.17.17 PM (1).jpeg",
+        15: "WhatsApp Image 2026-06-22 at 4.17.17 PM.jpeg"
+        
+    // Example:
+    // 2: "./meter2.jpg",
+    // 3: "./meter3.jpg"
+
+};
+
+
+/*
+===========================================================
+7-SEGMENT DIGIT DEFINITIONS
+
+Each digit is made using CSS segments.
+
+a = top
+b = upper-right
+c = lower-right
+d = bottom
+e = lower-left
+f = upper-left
+g = middle
+
+===========================================================
+*/
+
+const segmentMap = {
+
+    "0": ["a", "b", "c", "d", "e", "f"],
+
+    "1": ["b", "c"],
+
+    "2": ["a", "b", "g", "e", "d"],
+
+    "3": ["a", "b", "c", "d", "g"],
+
+    "4": ["f", "g", "b", "c"],
+
+    "5": ["a", "f", "g", "c", "d"],
+
+    "6": ["a", "f", "g", "e", "c", "d"],
+
+    "7": ["a", "b", "c"],
+
+    "8": ["a", "b", "c", "d", "e", "f", "g"],
+
+    "9": ["a", "b", "c", "d", "f", "g"]
+
+};
+
+
+/*
+===========================================================
+GET HTML ELEMENTS
+===========================================================
+*/
+
+const meterButtons =
+    document.getElementById("meterButtons");
+
+const meterImage =
+    document.getElementById("meterImage");
+
+const meterArea =
+    document.getElementById("meterArea");
+
+const digitLayer =
+    document.getElementById("digitLayer");
+
+const readingInput =
+    document.getElementById("readingInput");
+
+const digitColor =
+    document.getElementById("digitColor");
+
+const status =
+    document.getElementById("status");
+
+
+/*
+===========================================================
+GLOBAL VARIABLES
+===========================================================
+*/
+
+let digitGroup = null;
+
+let scale = 1;
+
+let currentX = 0;
+
+let currentY = 0;
+
+
+/*
+===========================================================
+CREATE METER 1 - METER 15 BUTTONS
+===========================================================
+*/
+
+for (let i = 1; i <= 15; i++) {
+
+    const button = document.createElement("button");
+
+    button.textContent = "Meter " + i;
+
+
+    button.onclick = () => {
+
+        /*
+        Check whether image is configured
+        */
+
+        if (!meterImages[i]) {
+
+            status.textContent =
+                "Meter " + i +
+                " image is not configured yet.";
+
+            return;
+        }
+
+
+        /*
+        Load selected meter image
+        */
+
+        meterImage.src = meterImages[i];
+
+
+        /*
+        Image successfully loaded
+        */
+
+        meterImage.onload = () => {
+
+            status.textContent =
+                "Meter " + i + " loaded.";
+
+            resetPosition();
+
+        };
+
+
+        /*
+        Image failed
+        */
+
+        meterImage.onerror = () => {
+
+            status.textContent =
+                "Image not found: " +
+                meterImages[i];
+
+        };
+
+    };
+
+
+    meterButtons.appendChild(button);
+
+}
+
+
+/*
+===========================================================
+LOAD FIRST METER
+===========================================================
+*/
+
+if (meterImages[1]) {
+
+    meterImage.src = meterImages[1];
+
+}
+
+
+/*
+===========================================================
+CREATE ONE 7-SEGMENT DIGIT
+===========================================================
+*/
+
+function makeDigit(number) {
+
+    const digit =
+        document.createElement("div");
+
+    digit.className =
+        "seven-digit";
+
+
+    /*
+    Get active segments for this number
+    */
+
+    const activeSegments =
+        segmentMap[number];
+
+
+    /*
+    Active segments
+    */
+
+    activeSegments.forEach(segmentName => {
+
+        const segment =
+            document.createElement("span");
+
+        segment.className =
+            "seg " +
+            segmentName +
+            " on";
+
+        digit.appendChild(segment);
+
+    });
+
+
+    /*
+    Inactive segments
+    */
+
+    [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g"
+
+    ]
+    .filter(
+        segmentName =>
+            !activeSegments.includes(segmentName)
+    )
+    .forEach(segmentName => {
+
+        const segment =
+            document.createElement("span");
+
+        segment.className =
+            "seg " +
+            segmentName;
+
+        digit.appendChild(segment);
+
+    });
+
+
+    return digit;
+}
+
+
+/*
+===========================================================
+CREATE COMPLETE READING
+===========================================================
+*/
+
+function createDigits(value) {
+
+    /*
+    Remove previous digits
+    */
+
+    digitLayer.innerHTML = "";
+
+    digitGroup = null;
+
+
+    /*
+    Empty input
+    */
+
+    if (!value) {
+
+        status.textContent =
+            "Enter a reading first.";
+
+        return;
+    }
+
+
+    /*
+    Only numbers allowed
+    */
+
+    if (!/^\d+$/.test(value)) {
+
+        status.textContent =
+            "Only numbers are allowed.";
+
+        return;
+    }
+
+
+    /*
+    Create digit container
+    */
+
+    digitGroup =
+        document.createElement("div");
+
+    digitGroup.className =
+        "digit-group";
+
+
+    /*
+    Create each digit
+    */
+
+    [...value].forEach(number => {
+
+        digitGroup.appendChild(
+            makeDigit(number)
+        );
+
+    });
+
+
+    /*
+    Add to meter
+    */
+
+    digitLayer.appendChild(
+        digitGroup
+    );
+
+
+    /*
+    Reset size
+    */
+
+    scale = 1;
+
+
+    /*
+    Apply selected color
+    */
+
+    setColor();
+
+
+    /*
+    Put digits at center
+    */
+
+    resetPosition();
+
+
+    /*
+    Enable dragging
+    */
+
+    drag(digitGroup);
+
+
+    status.textContent =
+        "Reading " +
+        value +
+        " added. Drag it anywhere over the meter.";
+
+}
+
+
+/*
+===========================================================
+RESET DIGIT POSITION
+===========================================================
+*/
+
+function resetPosition() {
+
+    if (!digitGroup) {
+        return;
+    }
+
+
+    /*
+    Start in center of meter image
+    */
+
+    currentX =
+        (
+            meterArea.clientWidth -
+            digitGroup.offsetWidth
+        ) / 2;
+
+
+    currentY =
+        (
+            meterArea.clientHeight -
+            digitGroup.offsetHeight
+        ) / 2;
+
+
+    apply();
+
+}
+
+
+/*
+===========================================================
+APPLY POSITION + SCALE
+===========================================================
+*/
+
+function apply() {
+
+    if (!digitGroup) {
+        return;
+    }
+
+
+    digitGroup.style.left =
+        currentX + "px";
+
+
+    digitGroup.style.top =
+        currentY + "px";
+
+
+    digitGroup.style.transform =
+        "scale(" + scale + ")";
+
+}
+
+
+/*
+===========================================================
+DRAG FUNCTION
+
+Works with:
+
+Mouse
+Touch
+Pen
+
+Digits can be moved anywhere over the meter.
+===========================================================
+*/
+
+function drag(element) {
+
+    let down = false;
+
+    let startX = 0;
+
+    let startY = 0;
+
+    let originalX = 0;
+
+    let originalY = 0;
+
+
+    /*
+    Mouse / Touch starts
+    */
+
+    element.addEventListener(
+        "pointerdown",
+        event => {
+
+            event.preventDefault();
+
+            down = true;
+
+
+            element.classList.add(
+                "dragging"
+            );
+
+
+            startX =
+                event.clientX;
+
+            startY =
+                event.clientY;
+
+
+            originalX =
+                currentX;
+
+            originalY =
+                currentY;
+
+
+            element.setPointerCapture(
+                event.pointerId
+            );
+
+        }
+    );
+
+
+    /*
+    Move
+    */
+
+    element.addEventListener(
+        "pointermove",
+        event => {
+
+            if (!down) {
+                return;
+            }
+
+
+            currentX =
+                originalX +
+                event.clientX -
+                startX;
+
+
+            currentY =
+                originalY +
+                event.clientY -
+                startY;
+
+
+            apply();
+
+        }
+    );
+
+
+    /*
+    Stop dragging
+    */
+
+    element.addEventListener(
+        "pointerup",
+        event => {
+
+            down = false;
+
+
+            element.classList.remove(
+                "dragging"
+            );
+
+
+            try {
+
+                element.releasePointerCapture(
+                    event.pointerId
+                );
+
+            } catch (_) {}
+
+        }
+    );
+
+
+    /*
+    Cancel dragging
+    */
+
+    element.addEventListener(
+        "pointercancel",
+        () => {
+
+            down = false;
+
+            element.classList.remove(
+                "dragging"
+            );
+
+        }
+    );
+
+}
+
+
+/*
+===========================================================
+CHANGE DIGIT COLOR
+===========================================================
+*/
+
+function setColor() {
+
+    if (!digitGroup) {
+        return;
+    }
+
+
+    digitGroup
+        .querySelectorAll(".seven-digit")
+        .forEach(digit => {
+
+            digit.style.setProperty(
+                "--digit-color",
+                digitColor.value
+            );
+
+        });
+
+}
+
+
+/*
+===========================================================
+UPDATE DIGIT BUTTON
+===========================================================
+*/
+
+document
+    .getElementById("updateBtn")
+    .onclick = () => {
+
+        createDigits(
+            readingInput.value.trim()
+        );
+
+    };
+
+
+/*
+===========================================================
+ENTER KEY
+===========================================================
+*/
+
+readingInput.onkeydown = event => {
+
+    if (event.key === "Enter") {
+
+        createDigits(
+            readingInput.value.trim()
+        );
+
+    }
+
+};
+
+
+/*
+===========================================================
+A+ BUTTON
+===========================================================
+*/
+
+document
+    .getElementById("plusBtn")
+    .onclick = () => {
+
+        if (!digitGroup) {
+            return;
+        }
+
+
+        scale =
+            Math.min(
+                4,
+                scale + 0.1
+            );
+
+
+        apply();
+
+    };
+
+
+/*
+===========================================================
+A- BUTTON
+===========================================================
+*/
+
+document
+    .getElementById("minusBtn")
+    .onclick = () => {
+
+        if (!digitGroup) {
+            return;
+        }
+
+
+        scale =
+            Math.max(
+                0.3,
+                scale - 0.1
+            );
+
+
+        apply();
+
+    };
+
+
+/*
+===========================================================
+COLOR PICKER
+===========================================================
+*/
+
+digitColor.oninput =
+    setColor;
+
+
+/*
+===========================================================
+RESET BUTTON
+===========================================================
+*/
+
+document
+    .getElementById("resetBtn")
+    .onclick = () => {
+
+        readingInput.value = "";
+
+        digitLayer.innerHTML = "";
+
+        digitGroup = null;
+
+        scale = 1;
+
+        currentX = 0;
+
+        currentY = 0;
+
+        status.textContent =
+            "Reset complete.";
+
+    };
+
+</script>
+
+</body>
+</html>
